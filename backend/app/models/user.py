@@ -15,3 +15,4 @@ class User(Base):
     is_superuser = Column(Boolean(), default=False)
     fines = relationship("Fine", backref="user")
     savings = relationship("Saving", backref="user")
+    loans = relationship("Loan", backref="user")
