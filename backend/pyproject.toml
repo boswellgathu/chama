@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "chama"
+version = "0.1.0"
+description = ""
+authors = ["boswellgathu <boswellgathu@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.77.1"
+uvicorn = "^0.17.6"
+black = "^22.3.0"
+pydantic = {extras = ["email"], version = "^1.9.0"}
+FastAPI-SQLAlchemy = "^0.2.1"
+alembic = "^1.7.7"
+psycopg2 = "^2.9.3"
+python-dotenv = "^0.20.0"
+passlib = "^1.7.4"
+tenacity = "^8.0.1"
+databases = "^0.5.5"
+asyncpg = "^0.25.0"
+bcrypt = "^3.2.2"
+sentry-sdk = "^1.5.12"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
