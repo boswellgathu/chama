@@ -2,25 +2,25 @@ from datetime import date, datetime
 from pydantic import BaseModel
 
 
-class InstallmentBase(BaseModel):
+class InstalmentBase(BaseModel):
     date_paid: date
     month: int
     amount: float
     loan_id: int
 
 
-class InstallmentCreate(InstallmentBase):
+class InstalmentCreate(InstalmentBase):
     pass
 
 
-class InstallmentUpdate(InstallmentCreate):
+class InstalmentUpdate(InstalmentCreate):
     date_paid: None | date
     month: None | int
     amount: None | float
     loan_id: None | int
 
 
-class InstallmentInDBBase(InstallmentCreate):
+class InstalmentInDBBase(InstalmentCreate):
     id: int | None = None
 
     class Config:
@@ -28,12 +28,12 @@ class InstallmentInDBBase(InstallmentCreate):
 
 
 # Additional properties to return via API
-class Installment(InstallmentInDBBase):
+class Instalment(InstalmentInDBBase):
     principal: float
     interest: float
 
 
 # Additional properties stored in DB
-class InstallmentInDB(InstallmentInDBBase):
+class InstalmentInDB(InstalmentInDBBase):
     created_at: datetime
     updated_at: datetime

@@ -1,4 +1,11 @@
-from sqlalchemy import Column, Float, ForeignKey, Integer, String, DateTime
+from sqlalchemy import (
+    Column,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    DateTime,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -10,7 +17,7 @@ class Loan(Base):
     date_acquired = Column(DateTime(timezone=True), server_default=func.now())
     amount = Column(Float, nullable=False)
     interest_rate = Column(Integer, default=10)
-    paid = Column(Float)
+    amount_paid = Column(Float)
     balance = Column(Float)
     period = Column(Integer, default=6)
     remaining_period = Column(Integer, default=6)

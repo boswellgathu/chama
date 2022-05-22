@@ -3,16 +3,17 @@ from datetime import date, datetime
 
 from pydantic import BaseModel
 
+
 class LoanStatus(str, Enum):
     DEFAULTED = "DEFAULTED"
     SERVICED = "SERVICED"
     COMPLETED = "COMPLETED"
 
+
 class LoanBase(BaseModel):
     date_acquired: date
     amount: int
-    paid: None | float = None
-    balance: None | float = None
+    amount_paid: None | float = 0.0
     interest_rate: int = 10
     period: int = 6  # months
     member_id: int
@@ -25,7 +26,7 @@ class LoanCreate(LoanBase):
 class LoanUpdate(LoanCreate):
     date_acquired: None | date
     amount: None | int
-    paid: float
+    amount_paid: float
     balance: float
     member_id: None | int
 
@@ -39,6 +40,7 @@ class LoanInDBBase(LoanCreate):
 
 # Additional properties to return via API
 class Loan(LoanInDBBase):
+    balance: None | float = None
     remaining_period: int = 6
     status: None | LoanStatus = None
 

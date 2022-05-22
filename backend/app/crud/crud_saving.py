@@ -14,9 +14,6 @@ from app.schemas.fine import FineCreate, FineReason
 
 
 class CRUDSaving(CRUDBase[Saving, SavingCreate, SavingUpdate]):
-    def get_by_id(self, db: Session, *, id: int) -> None | Saving:
-        return db.query(Saving).filter(Saving.id == id).first()
-
     def create(self, db: Session, *, obj_in: SavingCreate) -> Saving:
         is_saving_late: bool = self.is_saving_late(obj_in.date_sent, obj_in.month)
         db_obj = Saving(
@@ -98,7 +95,7 @@ class CRUDSaving(CRUDBase[Saving, SavingCreate, SavingUpdate]):
                 elif db_obj.is_late and not is_saving_late:
                     # is_saving_late = False and is_late = True
                     # delete associated fine record
-                    fine_record = fine_class.get_by_id(db, id=db_obj.fine_id)
+                    fine_record = fine_class.get(db, id=db_obj.fine_id)
                     db.delete(fine_record)
                     db.commit()
 

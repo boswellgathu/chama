@@ -23,6 +23,14 @@ def create_saving(
     """
     Create new saving.
     """
+
+    member = crud.user.get(db, id=saving_in.member_id)
+    if not member:
+        raise HTTPException(
+            status_code=404,
+            detail="The member whose saving is being added does not exist in the system",
+        )
+
     try:
         saving = crud.saving.create(db, obj_in=saving_in)
     except (IntegrityError, Exception) as err:

@@ -8,9 +8,6 @@ from app.schemas.fine import FineCreate, FineUpdate
 
 
 class CRUDFine(CRUDBase[Fine, FineCreate, FineUpdate]):
-    def get_by_id(self, db: Session, *, id: int) -> None | Fine:
-        return db.query(Fine).filter(Fine.id == id).first()
-
     def create(self, db: Session, *, obj_in: FineCreate) -> Fine:
         db_obj = Fine(
             amount=obj_in.amount,
