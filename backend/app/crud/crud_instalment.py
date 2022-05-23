@@ -7,25 +7,21 @@ from app.models import Instalment, Loan
 from app.schemas.instalment import InstalmentCreate, InstalmentUpdate
 
 
-def update_loan(db: Session, loan_db_obj: Loan, principal: int) -> None:
-    loan_db_obj.amount_paid += principal
-    loan_db_obj.balance -= principal
-
-    db.add(loan_db_obj)
-    db.commit()
-
-
 class CRUDInstalment(CRUDBase[Instalment, InstalmentCreate, InstalmentUpdate]):
     def create(
         self, db: Session, *, obj_in: InstalmentCreate, loan_db_obj: Loan
     ) -> Instalment:
-        update_loan(db, loan_db_obj=loan_db_obj, principal=obj_in.principal)
+        # todo: Add a reducing balance interest calculator. Do the math to get principal and interest.
+        # todo: This interest calculator does not consider months
+        interest = self.calculate_interest(loan=loan_db_obj)
+        principal = obj_in.amount - interest
+        self.update_loan(db, loan=loan_db_obj, principal=principal, month=obj_in.month)
         db_obj = Instalment(
             date_paid=obj_in.date_paid,
             month=obj_in.month,
             amount=obj_in.amount,
-            principal=obj_in.principal,
-            interest=obj_in.interest,
+            principal=principal,
+            interest=interest,
             loan_id=obj_in.loan_id,
         )
         db.add(db_obj)
@@ -45,6 +41,19 @@ class CRUDInstalment(CRUDBase[Instalment, InstalmentCreate, InstalmentUpdate]):
         else:
             update_data = obj_in.dict(exclude_unset=True)
         return super().update(db, db_obj=db_obj, obj_in=update_data)
+
+    @staticmethod
+    def update_loan(db: Session, loan: Loan, principal: int, month: int) -> None:
+        loan.amount_paid += principal
+        loan.balance -= principal
+        # todo: fix this with say a daemon?
+        # loan.remaining_period -= month
+        db.add(loan)
+        db.commit()
+
+    @staticmethod
+    def calculate_interest(loan: Loan) -> float:
+        return loan.balance * (loan.interest_rate / 100)
 
 
 instalment = CRUDInstalment(Instalment)

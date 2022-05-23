@@ -30,6 +30,9 @@ class CRUDLoan(CRUDBase[Loan, LoanCreate, LoanUpdate]):
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
+        loan_amount = update_data.get("amount")
+        if loan_amount:
+            update_data["balance"] = loan_amount
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     @staticmethod

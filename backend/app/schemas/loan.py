@@ -26,8 +26,8 @@ class LoanCreate(LoanBase):
 class LoanUpdate(LoanCreate):
     date_acquired: None | date
     amount: None | int
-    amount_paid: float
-    balance: float
+    amount_paid: None | float
+    balance: None | float
     member_id: None | int
 
 
