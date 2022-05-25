@@ -11,9 +11,7 @@ class CRUDInstalment(CRUDBase[Instalment, InstalmentCreate, InstalmentUpdate]):
     def create(
         self, db: Session, *, obj_in: InstalmentCreate, loan_db_obj: Loan
     ) -> Instalment:
-        # todo: Add a reducing balance interest calculator. Do the math to get principal and interest.
-        # todo: This interest calculator does not consider months
-        interest = self.calculate_interest(loan=loan_db_obj)
+        interest: float = loan_db_obj.balance * (loan_db_obj.interest_rate / 100)
         principal = obj_in.amount - interest
         self.update_loan(db, loan=loan_db_obj, principal=principal, month=obj_in.month)
         db_obj = Instalment(
@@ -50,10 +48,6 @@ class CRUDInstalment(CRUDBase[Instalment, InstalmentCreate, InstalmentUpdate]):
         # loan.remaining_period -= month
         db.add(loan)
         db.commit()
-
-    @staticmethod
-    def calculate_interest(loan: Loan) -> float:
-        return loan.balance * (loan.interest_rate / 100)
 
 
 instalment = CRUDInstalment(Instalment)

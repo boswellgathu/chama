@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class LoanStatus(str, Enum):
     DEFAULTED = "DEFAULTED"
     SERVICED = "SERVICED"
+    RESTRUCTURED = "RESTRUCTURED"
     COMPLETED = "COMPLETED"
 
 
@@ -43,6 +44,7 @@ class Loan(LoanInDBBase):
     balance: None | float = None
     remaining_period: int = 6
     status: None | LoanStatus = None
+    restructured_to_id: None | int
 
 
 # Additional properties stored in DB

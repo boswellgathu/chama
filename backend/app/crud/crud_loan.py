@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.models.loan import Loan
-from app.schemas.loan import LoanCreate, LoanUpdate, LoanInDB
+from app.schemas.loan import LoanCreate, LoanInDB, LoanStatus, LoanUpdate
 
 
 class CRUDLoan(CRUDBase[Loan, LoanCreate, LoanUpdate]):
@@ -36,7 +36,7 @@ class CRUDLoan(CRUDBase[Loan, LoanCreate, LoanUpdate]):
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     @staticmethod
-    def is_previous_loan_paid(db: Session, member_id: int):
+    def is_previous_loan_paid(db: Session, member_id: int) -> bool:
         previous_unpaid_loan = (
             db.query(Loan).filter_by(member_id=member_id).filter(Loan.balance != 0.0)
         ).first()
@@ -44,6 +44,33 @@ class CRUDLoan(CRUDBase[Loan, LoanCreate, LoanUpdate]):
         if previous_unpaid_loan:
             return False
         return True
+
+    @staticmethod
+    def restructure(
+        db: Session, db_obj: Loan, obj_in: Union[LoanUpdate, Dict[str, Any]]
+    ) -> Loan:
+        pass
+        # create new loan
+        new_loan = Loan(
+            date_acquired=db_obj.date_acquired,
+            amount=obj_in.amount,
+            interest_rate=db_obj.interest_rate,
+            balance=obj_in.amount,
+            period=db_obj.period,
+            member_id=db_obj.member_id,
+        )
+        db.add(new_loan)
+        db.commit()
+
+        # update current with status restructured
+        db_obj.restructured_to_id = new_loan.id
+        db_obj.status = LoanStatus.RESTRUCTURED
+
+        db.add(db_obj)
+        db.commit()
+
+        db.refresh(new_loan)
+        return new_loan
 
 
 loan = CRUDLoan(Loan)

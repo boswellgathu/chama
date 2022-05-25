@@ -53,3 +53,20 @@ def update_loan(
         )
     loan = crud.loan.update(db, db_obj=loan, obj_in=loan_in)
     return loan
+
+
+@router.put("/{loan_id}/restructure", response_model=schemas.Loan)
+def restructure_loan(
+    *, db: Session = Depends(deps.get_db), loan_id: int, loan_in: LoanUpdate
+) -> Any:
+    """
+    restructure a loan.
+    """
+    loan = crud.loan.get(db, id=loan_id)
+    if not loan:
+        raise HTTPException(
+            status_code=404,
+            detail="The loan with this ID does not exist in the system",
+        )
+    loan = crud.loan.restructure(db, db_obj=loan, obj_in=loan_in)
+    return loan
