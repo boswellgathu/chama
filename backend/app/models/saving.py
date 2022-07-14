@@ -28,4 +28,6 @@ class Saving(Base):
 
     fine = relationship("Fine", backref=backref("saving", uselist=False))
 
-    __table_args__ = (UniqueConstraint("month", "year", name="month_year_unique"),)
+    __table_args__ = (
+        UniqueConstraint("month", "year", "member_id", name="month_year_user_unique"),
+    )

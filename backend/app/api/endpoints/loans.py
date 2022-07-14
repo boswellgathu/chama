@@ -9,9 +9,9 @@ from app import crud, schemas
 router = APIRouter()
 
 
-@router.get("/")
-async def hello():
-    return {"message": "hello loans!"}
+@router.get("/active")
+async def active_loans(*, db: Session = Depends(deps.get_db)):
+    return crud.loan.get_all_active_loans(db)
 
 
 @router.post("/", response_model=schemas.Loan)

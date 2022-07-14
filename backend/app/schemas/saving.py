@@ -55,3 +55,14 @@ class Saving(SavingInDBBase):
 class SavingInDB(SavingInDBBase):
     created_at: datetime
     updated_at: datetime
+
+
+class AllSavings(BaseModel):
+    name: str
+    year: int
+    month: str
+    date_sent: date
+    is_late: bool
+    fined: bool
+    fine_amount: float
+    fine_paid: bool

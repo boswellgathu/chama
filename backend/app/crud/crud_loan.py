@@ -49,7 +49,6 @@ class CRUDLoan(CRUDBase[Loan, LoanCreate, LoanUpdate]):
     def restructure(
         db: Session, db_obj: Loan, obj_in: Union[LoanUpdate, Dict[str, Any]]
     ) -> Loan:
-        pass
         # create new loan
         new_loan = Loan(
             date_acquired=db_obj.date_acquired,
@@ -71,6 +70,15 @@ class CRUDLoan(CRUDBase[Loan, LoanCreate, LoanUpdate]):
 
         db.refresh(new_loan)
         return new_loan
+
+    def get_all_active_loans(self, db: Session) -> list[Loan]:
+        loans = (
+            db.query(Loan)
+            .filter(Loan.balance > 0)
+            .filter(Loan.restructured_to_id == None)
+        ).all()
+
+        return loans
 
 
 loan = CRUDLoan(Loan)
