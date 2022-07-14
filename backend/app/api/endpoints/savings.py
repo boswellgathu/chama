@@ -6,14 +6,14 @@ from psycopg2.errors import UniqueViolation
 from sqlalchemy.orm import Session
 
 from app.api import dependencies as deps
-from app import crud, schemas, models
+from app import crud, schemas
 
 router = APIRouter()
 
 
 @router.get("/")
-async def hello():
-    return {"message": "hello savings!"}
+async def get_current_quarter_savings(*, db: Session = Depends(deps.get_db)) -> Any:
+    return crud.saving.current_quarter(db)
 
 
 @router.post("/", response_model=schemas.Saving)

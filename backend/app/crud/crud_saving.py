@@ -1,14 +1,15 @@
-import copy
 from datetime import date
 from typing import Any, Dict, Union
 from time import strptime
-from fastapi.encoders import jsonable_encoder
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.elements import literal_column
 
 from app.crud.base import CRUDBase
 from app.crud.crud_fine import fine as fine_class
-from app.models import Saving, Fine
+from app.models import Saving, Fine, User
 from app.schemas.saving import SavingCreate, SavingUpdate, Month
 from app.schemas.fine import FineCreate, FineReason
 
@@ -102,6 +103,57 @@ class CRUDSaving(CRUDBase[Saving, SavingCreate, SavingUpdate]):
                     update_data["fine_id"] = None
                     update_data["is_late"] = False
         return update_data
+
+    def current_quarter(self, db: Session):
+        month_quarters = {
+            "JANUARY": ["JANUARY", "FEBRUARY", "MARCH"],
+            "FEBRUARY": ["JANUARY", "FEBRUARY", "MARCH"],
+            "MARCH": ["JANUARY", "FEBRUARY", "MARCH"],
+            "APRIL": ["JANUARY", "FEBRUARY", "MARCH"],
+            "MAY": ["MAY", "JUNE", "JULY"],
+            "JUNE": ["MAY", "JUNE", "JULY"],
+            "JULY": ["MAY", "JUNE", "JULY"],
+            "AUGUST": ["MAY", "JUNE", "JULY"],
+            "SEPTEMBER": ["SEPTEMBER", "OCTOBER", "NOVEMBER"],
+            "OCTOBER": ["SEPTEMBER", "OCTOBER", "NOVEMBER"],
+            "NOVEMBER": ["SEPTEMBER", "OCTOBER", "NOVEMBER"],
+            "DECEMBER": ["SEPTEMBER", "OCTOBER", "NOVEMBER"],
+        }
+        today = date.today()
+        year = today.year
+        month = today.strftime("%B").upper()
+
+        current_quarter = month_quarters[month]
+        s_query = (
+            select(
+                User.name,
+                User.id,
+                func.string_agg(Saving.month, literal_column("','")).label("months"),
+            )
+            .join(User, User.id == Saving.member_id)
+            .where(Saving.year == year)
+            .where(Saving.month.in_(current_quarter))
+            .group_by(User.name, User.id)
+        ).subquery()
+
+        query = select(User.name, s_query.c.months).outerjoin(
+            s_query, s_query.c.id == User.id
+        )
+
+        db_data = db.execute(query).all()
+        return {
+            user_savings.name: self.process_user_quarter(
+                current_quarter, user_savings.months
+            )
+            for user_savings in db_data
+        }
+
+    @staticmethod
+    def process_user_quarter(current_quarter_months, user_savings_months):
+        user_months = []
+        if user_savings_months:
+            user_months = user_savings_months.split(",")
+        return {month: month in user_months for month in current_quarter_months}
 
 
 saving = CRUDSaving(Saving)
